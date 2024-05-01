@@ -6,6 +6,7 @@
 using namespace std;
 
 class Graph {
+private:
     int V;
     vector<vector<int>> adjList;
 

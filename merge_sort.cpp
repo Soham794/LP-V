@@ -3,82 +3,85 @@
 #include <queue>
 #include <stack>
 #include <omp.h>
+
 using namespace std;
 
-void merge(vector<int>& arr, int l, int m, int r) {
-    int n1 = m - l + 1;
-    int n2 = r - m; 
-
-    vector<int> L(n1), R(n2);
-
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (int j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-
-    int i = 0, j = 0, k = l;
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            i++;
-        } else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
+void merge(vector<int>& arr, int start, int mid, int end) {
+    vector<int> ans(end-start+1);
+    int ind1 = start, ind2 = mid+1, ind = 0;
+    
+    while(ind1 <= mid && ind2 <= end){
+        if(arr[ind1] < arr[ind2]) ans[ind++] = arr[ind1++];
+        else ans[ind++] = arr[ind2++];
     }
 
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
+    while(ind1 <= mid) ans[ind++] = arr[ind1++];
+
+    while(ind2 <= end) ans[ind++] = arr[ind2++];
+
+    for(int i=0,j=start; i<(end-start+1); i++, j++){
+        arr[j] = ans[i];
     }
 
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
 }
 
-void mergeSort(vector<int>& arr, int l, int r) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
+void merge_sort_parallel(vector<int>& arr, int start, int end) {
+    if(start >= end) return;
 
-        #pragma omp parallel sections
-        {
-            #pragma omp section
-            mergeSort(arr, l, m);
-            #pragma omp section
-            mergeSort(arr, m + 1, r);
-        }
-
-        merge(arr, l, m, r);
+    int mid = start + (end - start) / 2;
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        merge_sort_parallel(arr, start, mid);
+        #pragma omp section
+        merge_sort_parallel(arr, mid + 1, end);
     }
+    merge(arr, start, mid, end);
+
 }
+
+void merge_sort_sequential(vector<int>& arr, int start, int end) {
+    if(start >= end) return;
+
+    int mid = start + (end - start) / 2;
+    merge_sort_parallel(arr, start, mid);
+    merge_sort_parallel(arr, mid + 1, end);
+    
+    merge(arr, start, mid, end);
+}
+
 void printVector(vector<int>& arr) {
-    for (int num : arr)
-        std::cout << num << " ";
-    std::cout << std::endl;
+    for (int num : arr) cout << num << " ";
+    cout << endl;
 }
 
 int main() {
+
     int n = 100; 
     vector<int> arr(n), arr_copy(n);
 
-    srand(42);
     for (int i = 0; i < n; i++) {
-        arr[i] = rand() % 100;
+        arr[i] = rand() % 1000;
         arr_copy[i] = arr[i];
     }
 
-    cout << "Original vector:" <<endl;
-    printVector(arr);
+    
+    cout << "\nOriginal vector for sequential merge sort:" <<endl;
     double start = omp_get_wtime();
-    mergeSort(arr_copy, 0, n - 1);
+    // merge_sort_parallel(arr, 0, n-1);
     double end = omp_get_wtime();
-    cout << "\nParallel Merge Sort: " << end - start << " seconds" <<endl;
+    cout << "\nSequential Merge Sort: " << end - start << " seconds" <<endl;
     printVector(arr_copy);
+
+
+
+    cout << "\nOriginal vector for parallel merge sort:" <<endl;
+    printVector(arr);
+    start = omp_get_wtime();
+    merge_sort_parallel(arr, 0, n - 1);
+    end = omp_get_wtime();
+    cout << "\nParallel Merge Sort: " << end - start << " seconds" <<endl;
+    printVector(arr);
 
     return 0;
 }
