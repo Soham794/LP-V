@@ -9,12 +9,6 @@ public:
     int data;
 };
 
-class Breadthfs{
-    public:
-    node *insert(node *, int);
-    void bfs(node *);
-};
-
 
 node *insert(node *root, int data){
     if(!root){
