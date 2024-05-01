@@ -1,5 +1,6 @@
 #include<iostream>
 #include<stdlib.h>
+#include<stack>
 #include<queue>
 using namespace std;
 
@@ -52,27 +53,25 @@ node *insert(node *root, int data){
     }
 }
 
-void bfs(node *head){
-    queue<node*> q;
-    q.push(head);
-    int qSize;
-    while (!q.empty()){
-        qSize = q.size();
+void dfs(node *head){
+    stack<node*> st;
+    st.push(head);
+    int stSize;
+    while (!st.empty()){
+        stSize = st.size();
         #pragma omp parallel for
-        for (int i = 0; i < qSize; i++){
+        for (int i = 0; i < stSize; i++){
             node* currNode;
             #pragma omp critical
             {
-            currNode = q.front();
-            q.pop();
+            currNode = st.top();
+            st.pop();
             cout<<" "<<currNode->data;
             }
             #pragma omp critical
             {
-                if(currNode->left)
-                q.push(currNode->left);
-                if(currNode->right)
-                q.push(currNode->right);
+                if(currNode->right) st.push(currNode->right);
+                if(currNode->left) st.push(currNode->left);
             }
         }
     }
@@ -89,8 +88,8 @@ int main(){
         cout<<"do you want insert one more nodes?";
         cin>>ans;
     }while(ans=='y'||ans=='Y');
-    cout << "BFS: ";
-    bfs(root);
+    cout << "DFS: ";
+    dfs(root);
 
     return 0;
 }

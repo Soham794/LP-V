@@ -4,24 +4,43 @@
 #include <omp.h>
 using namespace std;
 
-const int MAX = 100000;
-vector<int> graph[MAX];
-bool visited[MAX];
+class Graph {
+private:
+    int V;
+    vector<vector<int>> adjList;
 
-void dfs(int node) {
+public:
+    Graph(int V) {
+        this->V = V;
+        adjList.resize(V+1);
+    }
+
+    void addEdge(int src, int dest) {
+        adjList[src].push_back(dest);
+        adjList[dest].push_back(src); // For undirected graph
+    }
+
+    vector<int> getNeighbors(int vertex) {
+        return adjList[vertex];
+    }
+};
+
+void dfs(Graph &graph, vector<bool> &visited, int node) {
     stack<int> s;
     s.push(node);
     while (!s.empty()){
         int curr_node = s.top();
         s.pop();
+
         if (!visited[curr_node]) {
             visited[curr_node] = true;
             if (visited[curr_node]) {
-                cout << curr_node << " ";
+                cout << "Visited: " << curr_node << endl;
             }
+            vector<int> neighbhors = graph.getNeighbors(curr_node);
             #pragma omp parallel for
-            for (int i = 0; i < graph[curr_node].size(); i++){
-                int adj_node = graph[curr_node][i];
+            for (int i = 0; i < neighbhors.size(); i++){
+                int adj_node = neighbhors[i];
                 if (!visited[adj_node]){
                     s.push(adj_node);
                 }
@@ -32,27 +51,28 @@ void dfs(int node) {
 
 
 int main() {
-    int n, m, start_node;
-    cout << "Enter No of Node,Edges,and start node:" ;
-    cin >> n >> m >> start_node;
-    //n: node,m:edges
-    cout << "Enter Pair of edges:" ;
-    for (int i = 0; i < m; i++) {
-        int u, v;
-        cin >> u >> v;
-        //u and v: Pair of edges
-        graph[u].push_back(v);
-        graph[v].push_back(u);
+
+    int V, E;
+    cout << "Enter the number of vertices: ";
+    cin >> V;
+    Graph graph(V);
+    cout << "Enter the number of edges: ";
+    cin >> E;
+
+    vector<bool> visited(V, false);
+
+    for (int i = 0; i < E; ++i) {
+        int src, dest;
+        cout << "Enter the edge " << i+1 << " (src dest):" << endl;
+        cin >> src >> dest;
+        graph.addEdge(src, dest);
     }
-    #pragma omp parallel for
-    for (int i = 0; i < n; i++) {
-        visited[i] = false;
-    }
-    dfs(start_node);
-    /* for (int i = 0; i < n; i++) {
-    if (visited[i]) {
-    cout << i << " ";
-    }
-    }*/
+
+    int start;
+    cout << "Enter the vertex to start from: ";
+    cin >> start;
+
+    dfs(graph, visited, start);
+
 return 0;
 }

@@ -13,7 +13,7 @@ private:
 public:
     Graph(int V) {
         this->V = V;
-        adjList.resize(V);
+        adjList.resize(V+1);
     }
 
     void addEdge(int src, int dest) {
@@ -46,6 +46,7 @@ void parallelBFS(Graph& graph, int source, vector<bool>& visited) {
             }
         }
     }
+    cout << endl;
 }
 
 int main() {
@@ -55,19 +56,22 @@ int main() {
     Graph graph(V);
     cout << "Enter the number of edges: ";
     cin >> E;
-    cout << "Enter the edges (src dest):" << endl;
+
     for (int i = 0; i < E; ++i) {
         int src, dest;
+        cout << "Enter the edge " << i+1 << " (src dest):" << endl;
         cin >> src >> dest;
         graph.addEdge(src, dest);
     }
-
+    int start;
+    cout << "Enter the vertex to start from: ";
+    cin >> start;
     vector<bool> visited(V, false);
     cout << "Parallel BFS:" << endl;
     #pragma omp parallel num_threads(2)
     {
         #pragma omp single nowait
-        parallelBFS(graph, 0, visited);
+        parallelBFS(graph, start, visited);
     }
   return 0;
 }

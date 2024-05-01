@@ -57,7 +57,7 @@ void printVector(vector<int>& arr) {
 
 int main() {
 
-    int n = 100; 
+    int n = 1000; 
     vector<int> arr(n), arr_copy(n);
 
     for (int i = 0; i < n; i++) {
@@ -67,21 +67,22 @@ int main() {
 
     
     cout << "\nOriginal vector for sequential merge sort:" <<endl;
+    printVector(arr);
     double start = omp_get_wtime();
-    // merge_sort_parallel(arr, 0, n-1);
+    merge_sort_sequential(arr, 0, n-1);
     double end = omp_get_wtime();
     cout << "\nSequential Merge Sort: " << end - start << " seconds" <<endl;
-    printVector(arr_copy);
+    printVector(arr);
 
 
 
     cout << "\nOriginal vector for parallel merge sort:" <<endl;
-    printVector(arr);
+    printVector(arr_copy);
     start = omp_get_wtime();
-    merge_sort_parallel(arr, 0, n - 1);
+    merge_sort_parallel(arr_copy, 0, n - 1);
     end = omp_get_wtime();
     cout << "\nParallel Merge Sort: " << end - start << " seconds" <<endl;
-    printVector(arr);
+    printVector(arr_copy);
 
     return 0;
 }

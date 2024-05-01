@@ -37,7 +37,7 @@ void printVector(const std::vector<int>& arr) {
 
 int main(){
 
-    int n = 10000; 
+    int n = 1000; 
     vector<int> arr(n), arr_copy(n);
     
     for (int i = 0; i < n; i++) {
@@ -55,6 +55,7 @@ int main(){
     printVector(arr);
 
     cout << "\nOriginal vector for parallel bubble sort: " << endl;
+    printVector(arr_copy);
 
     start = omp_get_wtime();
     bubble_sort_parallel(arr_copy, n);
@@ -62,7 +63,6 @@ int main(){
 
     cout << "\nParallel Bubble Sort:" << end-start << " seconds" << endl;
     printVector(arr_copy);
-
 
     return 0;
 }
