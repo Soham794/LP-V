@@ -7,7 +7,7 @@ using namespace std;
 
 void bubble_sort_parallel(vector<int> &arr, int n){
     for( int i = 0; i < n; i++ ){
-        int first = i % 2;
+        int first = i%2;
         #pragma omp parallel for shared(arr,first)
         for( int j = first; j < n-1; j += 2 ){
             if( arr[j] > arr[j+1] ){
